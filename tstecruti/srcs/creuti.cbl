@@ -93,11 +93,11 @@
            END-EXEC 
                
            IF SQLCODE = 0
-              DISPLAY "Insertion de l'utilisateur réussie." 
+      *       DISPLAY "Insertion de l'utilisateur reussie." 
               EXEC SQL COMMIT END-EXEC 
        
            ELSE
-              DISPLAY "Erreur d'insertion SQLCODE: " SQLCODE
+      *       DISPLAY "Erreur d'insertion SQLCODE: " SQLCODE
               EXEC SQL ROLLBACK END-EXEC 
            END-IF.
 

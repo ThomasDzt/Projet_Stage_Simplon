@@ -246,21 +246,28 @@
        
       *----------------------------------------------------------------- 
        0156-MSG-ERR-CHX-DEB.
+       
+           SET WS-FIN-BCL-NON TO TRUE.
            
-           PERFORM UNTIL WS-CHX = 1 OR 2
-               DISPLAY "Erreur de saisie, veuillez choisir 1 ou 2"
-               AT LINE 22 COL 03 
+           PERFORM UNTIL WS-FIN-BCL-OUI
+               IF WS-CHX NOT = 1 AND NOT = 2
+                   DISPLAY "Erreur de saisie, veuillez choisir 1 ou 2"
+                   AT LINE 22 COL 03 
        
-               DISPLAY "Appuyez sur entree"
-               AT LINE 23 COL 03 
+                   DISPLAY "Appuyez sur entree"
+                   AT LINE 23 COL 03 
        
-               ACCEPT WS-LRR 
-               AT LINE 23 COL 21
+                   ACCEPT WS-LRR 
+                   AT LINE 23 COL 21
                
-               DISPLAY S-ECR-CRE-UTI
-               ACCEPT  S-ECR-CRE-UTI
+                   PERFORM 0100-AFF-ECR-UTI-DEB
+                      THRU 0100-AFF-ECR-UTI-FIN
 
+               ELSE 
+                   PERFORM 0150-EVA-CHX-UTI-DEB
+                      THRU 0150-EVA-CHX-UTI-FIN
 
+               END-IF     
            END-PERFORM.
 
            EXIT.
