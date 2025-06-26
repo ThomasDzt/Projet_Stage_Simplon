@@ -13,11 +13,12 @@
       *                                                                *
       * ecruti=ecran utilisateur;                                      *
       * UTI=UTILISATEUR; MDP=MOT DE PASSE; ROL=ROLE; ECR=ECRAN;        *
-      * CRE=CREATION; VLD=VALIDE; ENT=ENTREE; LRR=LEURRE; CLR=COULEUR; *
-      * TXT=TEXTE; FND=FOND; PLS=PLUS; TRT=TIRET; BAR=BARRE;           *
-      * CRG= CROCHET GAUCHE; CRD=CROCHET DROIT; CHX=CHOIX;             *
-      * CFM=CONFIRMATION; AFF=AFFICHAGE; DEB=DEBUT; MSG=MESSAGE        *
-      * ERR=ERREUR; BCL=BOUCLE; APL=APPEL; PRG=PROGRAMME               *
+      * CRE=CREATION; LRR=LEURRE; CLR=COULEUR; CDE=CODE; RTR=RETOUR;   *
+      * DJA=DEJA; EXS=EXISTANT; TXT=TEXTE; FND=FOND; PLS=PLUS;         *
+      * TRT=TIRET; BAR=BARRE; CRG=CROCHET GAUCHE; CRD=CROCHET DROIT;   *
+      * CHX=CHOIX; CFM=CONFIRMATION; AFF=AFFICHAGE; DEB=DEBUT;         *
+      * MSG=MESSAGE; ERR=ERREUR; BCL=BOUCLE; APL=APPEL; PRG=PROGRAMME  *
+      * VID=VIDE;                                                      *
       ******************************************************************
        
        IDENTIFICATION DIVISION.
@@ -29,13 +30,20 @@
        DATA DIVISION.
        WORKING-STORAGE SECTION.
 
-       01 WS-ENT               PIC X(01).
+       01 WS-CDE-RTR           PIC 9(01).
+           88 WS-CDE-RTR-BON               VALUE 0.
+           88 WS-CDE-RTR-DJA-EXS           VALUE 1.
+           88 WS-CDE-RTR-ERR               VALUE 2.
+
+
        01 WS-LRR               PIC X(01).
        01 WS-PLS               PIC X(01)   VALUE "+".
        01 WS-TRT               PIC X(78)   VALUE ALL "-".
        01 WS-BAR               PIC X(01)   VALUE "|".
        01 WS-CRG               PIC X(01)   VALUE "[".
        01 WS-CRD               PIC X(01)   VALUE "]".
+       01 WS-VID               PIC X(30)   VALUE ALL " ".
+
        
        01 WS-FIN-BCL           PIC X(01)   VALUE SPACE.
            88 WS-FIN-BCL-OUI               VALUE "O".
@@ -282,5 +290,70 @@
                                WS-MDP-UTI
                                WS-ROL-UTI
            END-CALL. 
+
+           PERFORM 0250-CDE-ERR-MSG-DEB
+              THRU 0250-CDE-ERR-MSG-FIN.
+
            EXIT.
        0200-APL-PRG-FIN.
+
+
+
+      *----------------------------------------------------------------- 
+       
+       0250-CDE-ERR-MSG-DEB.
+           
+
+           SET WS-CDE-RTR-BON TO TRUE. 
+
+           EVALUATE TRUE 
+           
+               WHEN WS-CDE-RTR-BON
+                   
+                   DISPLAY WS-VID 
+                   AT LINE 22 COL 03
+
+                   DISPLAY "Utilisateur enregistre"
+                   AT LINE 22 COL 03
+                   
+                   DISPLAY "Appuyez sur entree"
+                   AT LINE 23 COL 03 
+       
+                   ACCEPT WS-LRR 
+                   AT LINE 23 COL 21
+
+               WHEN WS-CDE-RTR-DJA-EXS
+
+                   DISPLAY WS-VID 
+                   AT LINE 22 COL 03
+
+                   DISPLAY "Utilisateur deja existant"
+                   AT LINE 22 COL 03
+
+                   DISPLAY "Appuyez sur entree"
+                   AT LINE 23 COL 03 
+       
+                   ACCEPT WS-LRR 
+                   AT LINE 23 COL 21
+
+               WHEN WS-CDE-RTR-ERR
+
+                   DISPLAY WS-VID 
+                   AT LINE 22 COL 03
+
+                   DISPLAY "Erreur, utilisateur non enregistre"
+                   AT LINE 22 COL 03
+
+                   DISPLAY "Appuyez sur entree"
+                   AT LINE 23 COL 03 
+       
+                   ACCEPT WS-LRR 
+                   AT LINE 23 COL 21
+
+           END-EVALUATE.
+           EXIT.
+       0250-CDE-ERR-MSG-FIN.
+
+
+
+
