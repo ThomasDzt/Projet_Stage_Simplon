@@ -5,20 +5,19 @@
       * Sous-programme permettant de créer un utilisateur en entrant   *
       * toutes les informations nécessaires à l'aide de la SCREEN      *
       * SECTION. Le programme appellera le sous-programme creuti afin  *
-      * d'insérer les informations dans la base de données             *
+      * d'insérer les informations dans la base de données.            *
       *                                                                *
       *                                                                *
       *----------------------------------------------------------------*
       *                           TRIGRAMMES                           *
       *                                                                *
-      * ecruti=ecran utilisateur;                                      *
       * UTI=UTILISATEUR; MDP=MOT DE PASSE; ROL=ROLE; ECR=ECRAN;        *
       * CRE=CREATION; LRR=LEURRE; CLR=COULEUR; CDE=CODE; RTR=RETOUR;   *
       * DJA=DEJA; EXS=EXISTANT; TXT=TEXTE; FND=FOND; PLS=PLUS;         *
       * TRT=TIRET; BAR=BARRE; CRG=CROCHET GAUCHE; CRD=CROCHET DROIT;   *
       * CHX=CHOIX; CFM=CONFIRMATION; AFF=AFFICHAGE; DEB=DEBUT;         *
       * MSG=MESSAGE; ERR=ERREUR; BCL=BOUCLE; APL=APPEL; PRG=PROGRAMME  *
-      * VID=VIDE;                                                      *
+      * VID=VIDE; APP=APPUI; ENT=ENTREE.                               *
       ******************************************************************
        
        IDENTIFICATION DIVISION.
@@ -30,13 +29,15 @@
        DATA DIVISION.
        WORKING-STORAGE SECTION.
 
+      * Simulation d'un code retour pour l'insertion des informations
+      * de l'utilisateur dans la base de donnée.
+
        01 WS-CDE-RTR           PIC 9(01).
            88 WS-CDE-RTR-BON               VALUE 0.
            88 WS-CDE-RTR-DJA-EXS           VALUE 1.
            88 WS-CDE-RTR-ERR               VALUE 2.
 
-
-       01 WS-LRR               PIC X(01).
+      * Déclaration de valeurs d'affichage pour la SCREEN SECTION. 
        01 WS-PLS               PIC X(01)   VALUE "+".
        01 WS-TRT               PIC X(78)   VALUE ALL "-".
        01 WS-BAR               PIC X(01)   VALUE "|".
@@ -44,18 +45,22 @@
        01 WS-CRD               PIC X(01)   VALUE "]".
        01 WS-VID               PIC X(30)   VALUE ALL " ".
 
-       
+      * Booléen de contrôle de fin de boucle. 
        01 WS-FIN-BCL           PIC X(01)   VALUE SPACE.
            88 WS-FIN-BCL-OUI               VALUE "O".
            88 WS-FIN-BCL-NON               VALUE "N".
            
-       
+
+      * Variables correspondant aux informations entrées par 
+      * l'utilisateur. 
        01 WS-IDF-UTI           PIC X(30).
        01 WS-MDP-UTI           PIC X(30).
        01 WS-MDP-UTI-CFM       PIC X(30).
-
        01 WS-ROL-UTI           PIC X(14).
+
        01 WS-CHX               PIC X(01).
+       01 WS-LRR               PIC X(01).
+
        
        01 WS-CLR-TXT           PIC 9(01)       VALUE 7. *> Blanc
        01 WS-CLR-FND           PIC 9(01)       VALUE 0. *> Noir
@@ -173,12 +178,12 @@
 
 
        PROCEDURE DIVISION.
+
+      * Affichage de l'écran de création d'utilisateur.
+
            PERFORM 0100-AFF-ECR-UTI-DEB
               THRU 0100-AFF-ECR-UTI-FIN.
 
-
-
-            
 
            EXIT PROGRAM.
 
@@ -189,25 +194,28 @@
        0100-AFF-ECR-UTI-DEB.
            DISPLAY S-ECR-CRE-UTI.
            ACCEPT  S-ECR-CRE-UTI.
-           
+
            PERFORM 0150-EVA-CHX-UTI-DEB
               THRU 0150-EVA-CHX-UTI-FIN.
 
            EXIT.
            
        0100-AFF-ECR-UTI-FIN.
-      *----------------------------------------------------------------- 
+      *-----------------------------------------------------------------
+
+      * Evaluation du choix de l'utilisateur.     
+       
        0150-EVA-CHX-UTI-DEB.
+
            EVALUATE WS-CHX
+
                WHEN 1
                    PERFORM 0155-CFM-MDP-UTI-DEB
                       THRU 0155-CFM-MDP-UTI-FIN
 
-                   DISPLAY "Appuyez sur entree"
-                   AT LINE 23 COL 03 
-
-                   ACCEPT WS-LRR 
-                   AT LINE 23 COL 21 
+                   PERFORM 0156-APP-ENT-DEB
+                      THRU 0156-APP-ENT-FIN
+                    
                    
                    PERFORM 0200-APL-PRG-DEB
                       THRU 0200-APL-PRG-FIN
@@ -216,16 +224,17 @@
                    EXIT PROGRAM
 
                WHEN OTHER 
-                   PERFORM 0156-MSG-ERR-CHX-DEB
-                      THRU 0156-MSG-ERR-CHX-FIN
+                   PERFORM 0157-MSG-ERR-CHX-DEB
+                      THRU 0157-MSG-ERR-CHX-FIN
                    
 
            END-EVALUATE.
            EXIT.
 
        0150-EVA-CHX-UTI-FIN.
-      *----------------------------------------------------------------- 
-       
+      *-----------------------------------------------------------------
+
+      * Confirmation ou non du mot de passe entré.         
        0155-CFM-MDP-UTI-DEB.
 
            SET WS-FIN-BCL-NON TO TRUE.
@@ -238,11 +247,9 @@
                ELSE 
                    DISPLAY "Echec lors de la creation de l'utilisateur"
                    AT LINE 22 COL 03  
-                   DISPLAY "Appuyez sur entree"
-                   AT LINE 23 COL 03 
-       
-                   ACCEPT WS-LRR 
-                   AT LINE 23 COL 21
+                   
+                   PERFORM 0156-APP-ENT-DEB
+                      THRU 0156-APP-ENT-FIN
                
                    PERFORM 0100-AFF-ECR-UTI-DEB
                       THRU 0100-AFF-ECR-UTI-FIN
@@ -252,8 +259,22 @@
            
        0155-CFM-MDP-UTI-FIN.
        
+      *-----------------------------------------------------------------
+       0156-APP-ENT-DEB.
+           DISPLAY "Appuyez sur entree"
+           AT LINE 23 COL 03. 
+
+           ACCEPT WS-LRR 
+           AT LINE 23 COL 21.
+
+           EXIT.
+       0156-APP-ENT-FIN.
+
       *----------------------------------------------------------------- 
-       0156-MSG-ERR-CHX-DEB.
+
+      * Message d'erreur si l'utilisateur ne rentre pas les options 
+      * proposées. 
+       0157-MSG-ERR-CHX-DEB.
        
            SET WS-FIN-BCL-NON TO TRUE.
            
@@ -262,11 +283,8 @@
                    DISPLAY "Erreur de saisie, veuillez choisir 1 ou 2"
                    AT LINE 22 COL 03 
        
-                   DISPLAY "Appuyez sur entree"
-                   AT LINE 23 COL 03 
-       
-                   ACCEPT WS-LRR 
-                   AT LINE 23 COL 21
+                   PERFORM 0156-APP-ENT-DEB
+                      THRU 0156-APP-ENT-FIN
                
                    PERFORM 0100-AFF-ECR-UTI-DEB
                       THRU 0100-AFF-ECR-UTI-FIN
@@ -280,10 +298,12 @@
 
            EXIT.
 
-       0156-MSG-ERR-CHX-FIN.
+       0157-MSG-ERR-CHX-FIN.
 
       *----------------------------------------------------------------- 
-       
+
+      * Appel du sous-programme d'insertion des informations dans la 
+      * base de données. 
        0200-APL-PRG-DEB.
        
            CALL "creuti" USING WS-IDF-UTI
@@ -301,6 +321,8 @@
 
       *----------------------------------------------------------------- 
        
+      * Simulation d'un code retour d'erreur selon les informations
+      * entrées par l'utilisateur. 
        0250-CDE-ERR-MSG-DEB.
            
 
@@ -316,11 +338,8 @@
                    DISPLAY "Utilisateur enregistre"
                    AT LINE 22 COL 03
                    
-                   DISPLAY "Appuyez sur entree"
-                   AT LINE 23 COL 03 
-       
-                   ACCEPT WS-LRR 
-                   AT LINE 23 COL 21
+                   PERFORM 0156-APP-ENT-DEB
+                      THRU 0156-APP-ENT-FIN
 
                WHEN WS-CDE-RTR-DJA-EXS
 
@@ -330,11 +349,8 @@
                    DISPLAY "Utilisateur deja existant"
                    AT LINE 22 COL 03
 
-                   DISPLAY "Appuyez sur entree"
-                   AT LINE 23 COL 03 
-       
-                   ACCEPT WS-LRR 
-                   AT LINE 23 COL 21
+                   PERFORM 0156-APP-ENT-DEB
+                      THRU 0156-APP-ENT-FIN
 
                WHEN WS-CDE-RTR-ERR
 
@@ -344,11 +360,8 @@
                    DISPLAY "Erreur, utilisateur non enregistre"
                    AT LINE 22 COL 03
 
-                   DISPLAY "Appuyez sur entree"
-                   AT LINE 23 COL 03 
-       
-                   ACCEPT WS-LRR 
-                   AT LINE 23 COL 21
+                   PERFORM 0156-APP-ENT-DEB
+                      THRU 0156-APP-ENT-FIN
 
            END-EVALUATE.
            EXIT.
