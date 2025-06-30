@@ -21,10 +21,12 @@ OCESQL*EXEC SQL BEGIN DECLARE SECTION END-EXEC.
 
        01 PG-QTE-VRT           PIC 9(10).
               
-       01 PG-TYP-CHG           PIC 9(01).
-           88 PG-AJT                       VALUE 0.
-           88 PG-RTI                       VALUE 1.
+       01 PG-TYP-CHG           PIC X(01).
+           88 PG-AJT                       VALUE '+'.
+           88 PG-RTI                       VALUE '-'.
 
+       01 PG-IDF-UTI         PIC 9(10).
+       
            
       * Déclaration des variables correspondant aux identifiants PSQL et à ma base de données
        01  PG-IDF-SQL          PIC X(30) VALUE "postgres".
@@ -97,8 +99,8 @@ OCESQL     END-CALL.
            DISPLAY "Entrez l'ID de la pièce :".
            ACCEPT PG-IDF-PIE.
            
-      *    DISPLAY "Entrez le nom de la pièce :".
-      *    ACCEPT PG-NOM-PIE.
+           DISPLAY "Entrez le nom de la pièce :".
+           ACCEPT PG-NOM-PIE.
        
            DISPLAY "Entrez la quantité de stock de la pièce :".
            ACCEPT PG-QTE-PIE.
@@ -111,6 +113,9 @@ OCESQL     END-CALL.
            
            DISPLAY "Saisir la quantité à ajouter ou à retirer :".  
            ACCEPT PG-QTE-VRT.
+           
+           DISPLAY "Saisir l'ID de l'utilisateur :".  
+           ACCEPT PG-IDF-UTI.
 
            EXIT.
        0100-SAISIE-INFOS-PIE-FIN.
@@ -121,7 +126,9 @@ OCESQL     END-CALL.
            CALL "majpie" USING   PG-IDF-PIE,
                                  PG-QTE-PIE,
                                  PG-TYP-CHG,
-                                 PG-QTE-VRT           
+                                 PG-QTE-VRT,
+                                 PG-NOM-PIE,
+                                 PG-IDF-UTI           
            END-CALL.
        
            EXIT.
